@@ -1,0 +1,27 @@
+# Auto-detect text files and perform LF normalization
+* text=auto eol=lf
+
+# Explicitly declare source files you want to always be normalized and converted to native line endings on checkout
+*.cpp text
+*.hpp text
+*.h text
+*.c text
+*.txt text
+*.md text
+CMakeLists.txt text
+
+# Shell scripts must always use LF (Unix) line endings, even on Windows
+*.sh text eol=lf
+
+# SECURITY: Mark sensitive/encrypted files as binary to avoid Git attempting to diff them
+# This prevents accidental textual exposure of encrypted chunks in PRs and logs
+*.enc binary
+blockchain_ledger* binary
+
+# Mark compiled resources and dependencies as binary
+*.a binary
+*.o binary
+*.dylib binary
+*.so binary
+AgenticPipeline binary
+AgenticMVCpipe binary

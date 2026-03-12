@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Global Agentic Switchboard</title>
+    <style>
+        :root { --bg: #0f0f0f; --fg: #00ff41; --panel: #1a1a1a; --border: #333; }
+        body { font-family: 'Courier New', Courier, monospace; background: var(--bg); color: var(--fg); margin: 0; padding: 20px; }
+        .header { border-bottom: 2px solid var(--fg); padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .node-card { background: var(--panel); border: 1px solid var(--border); padding: 15px; border-radius: 4px; }
+        .node-card.ONLINE { border-left: 5px solid #00ff41; }
+        .node-card.OFFLINE { border-left: 5px solid #ff3e3e; opacity: 0.7; }
+        .stats { font-size: 0.8em; color: #aaa; margin-top: 10px; }
+        .actions { margin-top: 15px; display: flex; gap: 10px; }
+        button { background: transparent; border: 1px solid var(--fg); color: var(--fg); padding: 5px 10px; cursor: pointer; font-family: inherit; }
+        button:hover { background: var(--fg); color: black; }
+        .deploy-form { background: #222; padding: 20px; border: 1px solid var(--fg); margin-bottom: 20px; }
+        input { background: #000; border: 1px solid #444; color: var(--fg); padding: 5px; margin-right: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>GLOBAL_AGENTIC_SWITCHBOARD v1.0</h1>
+    <div id="clock"></div>
+</div>
+
+<div class="deploy-form">
+    <h3>DEPLOY_NEW_MVC_ENTITY</h3>
+    <input type="text" id="node-name" placeholder="Entity ID (e.g. Node_Alpha)">
+    <label><input type="checkbox" id="node-sentry"> Enable PrivacySentry</label>
+    <button onclick="deployNode()">INITIALIZE_DEPLOYMENT</button>
+</div>
+
+<div class="grid" id="node-grid"></div>
+
+<script>
+    async function refresh() {
+        const res = await fetch('/api/orchestrator/nodes');
+        const nodes = await res.json();
+        renderNodes(nodes);
+    }
+
+    function renderNodes(nodes) {
+        const grid = document.getElementById('node-grid');
+        grid.innerHTML = nodes.map(n => `
+            <div class="node-card ${n.status}">
+                <div style="display:flex; justify-content:space-between">
+                    <strong>${n.id}</strong>
+                    <span>[${n.status}]</span>
+                </div>
+                <div class="stats">
+                    URL: ${n.url}<br>
+                    AUTONOMOUS_STATE: ${n.state}<br>
+                    TRAFFIC_VOLUME: ${n.msg_count} pkts
+                </div>
+                <div class="actions">
+                    <button onclick="window.open('${n.url}', '_blank')">OPEN_LOCAL_UI</button>
+                    <button onclick="setupPipe('${n.url}')">INIT_PIPE</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function deployNode() {
+        const name = document.getElementById('node-name').value;
+        const sentry = document.getElementById('node-sentry').checked;
+        if(!name) return alert("ID Required");
+        
+        await fetch('/api/orchestrator/deploy', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ name, sentry })
+        });
+        refresh();
+    }
+
+    async function setupPipe(sourceUrl) {
+        const target = prompt("Enter target Node URL (e.g. http://localhost:8080):");
+        if(!target) return;
+        await fetch('/api/orchestrator/pipe', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ source_url: sourceUrl, target_url: target })
+        });
+        alert("Pipe Synchronized");
+    }
+
+    setInterval(refresh, 2000);
+    refresh();
+    setInterval(() => { document.getElementById('clock').textContent = new Date().toLocaleTimeString(); }, 1000);
+</script>
+
+</body>
+</html>

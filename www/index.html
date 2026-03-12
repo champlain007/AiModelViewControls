@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgenticMVCpipe Dashboard</title>
+    <style>
+        :root { --bg: #1e1e1e; --fg: #e0e0e0; --accent: #007acc; --panel: #252526; --danger: #d32f2f; --alert: #ff9800; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--fg); margin: 0; padding: 20px; display: grid; grid-template-columns: 1fr 2fr; gap: 20px; height: 95vh; }
+        h2 { border-bottom: 1px solid #444; padding-bottom: 5px; margin-top: 0; font-size: 1em; color: var(--accent); }
+        .panel { background: var(--panel); border-radius: 8px; padding: 15px; overflow-y: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .card { background: #333; padding: 8px; margin-bottom: 8px; border-radius: 4px; font-size: 0.9em; }
+        .alert-card { border-left: 4px solid var(--danger); background: #422; }
+        .log-entry { font-family: monospace; font-size: 0.85em; padding: 4px 0; border-bottom: 1px solid #333; }
+        .topic-badge { background: var(--accent); color: white; padding: 1px 4px; border-radius: 3px; font-size: 0.8em; }
+        #status-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #007acc; color: white; padding: 5px 20px; font-size: 0.8em; z-index: 100; }
+        .form-group { margin-bottom: 10px; display: grid; gap: 5px; }
+        input, select, button { padding: 6px; background: #222; border: 1px solid #444; color: white; border-radius: 3px; }
+        button { background: var(--accent); border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="panel">
+    <h2>Security Alerts</h2>
+    <div id="alert-list"></div>
+
+    <h2 style="margin-top:20px">AppDomains</h2>
+    <div class="form-group">
+        <input type="text" id="dom-name" placeholder="Domain Name">
+        <input type="text" id="dom-agents" placeholder="Whitelisted Agents (csv)">
+        <input type="text" id="dom-topics" placeholder="Protected Topics (csv)">
+        <button onclick="addDomain()">Create AppDomain</button>
+    </div>
+    <div id="domain-list"></div>
+
+    <h2 style="margin-top:20px">Resource Poller</h2>
+    <div class="form-group">
+        <input type="text" id="r-id" placeholder="Resource ID">
+        <input type="text" id="r-target" placeholder="Target">
+        <button onclick="addResource()">Add Poll</button>
+    </div>
+</div>
+
+<div class="panel">
+    <h2>Pipeline Traffic</h2>
+    <div id="message-log"></div>
+</div>
+
+<div id="status-bar">AgenticMVCpipe | <span id="conn-status">...</span></div>
+
+<script>
+    async function api(path, method='GET', body=null) {
+        const opts = { method };
+        if (body) opts.body = JSON.stringify(body);
+        return fetch('/api' + path, opts);
+    }
+
+    async function fetchData() {
+        try {
+            const [state, alerts, domains] = await Promise.all([
+                api('/state').then(r => r.json()),
+                api('/alerts').then(r => r.json()),
+                api('/domains').then(r => r.json())
+            ]);
+            renderTraffic(state.messages);
+            renderAlerts(alerts);
+            renderDomains(domains);
+            document.getElementById('conn-status').textContent = "Connected | Key: " + (state.key_id || "N/A");
+        } catch (e) { document.getElementById('conn-status').textContent = "Disconnected"; }
+    }
+
+    function addDomain() {
+        const name = document.getElementById('dom-name').value;
+        const whitelist = document.getElementById('dom-agents').value.split(',').map(s => s.trim());
+        const topics = document.getElementById('dom-topics').value.split(',').map(s => s.trim());
+        api('/domains', 'POST', { name, whitelist, topics }).then(fetchData);
+    }
+
+    function addResource() {
+        const id = document.getElementById('r-id').value;
+        const target = document.getElementById('r-target').value;
+        api('/resources', 'POST', { id, target, type: 'SHELL', interval: 5000 }).then(fetchData);
+    }
+
+    function renderTraffic(msgs) {
+        document.getElementById('message-log').innerHTML = msgs.slice().reverse().map(m => `
+            <div class="log-entry">
+                <span style="color:#888">[${new Date(m.timestamp).toLocaleTimeString()}]</span>
+                <span style="color:var(--alert)">${m.sender}</span> -> 
+                <span class="topic-badge">${m.topic}</span> 
+                <span style="${m.encrypted?'color:#4f4':''}">${m.content}</span>
+            </div>
+        `).join('');
+    }
+
+    function renderAlerts(alerts) {
+        document.getElementById('alert-list').innerHTML = alerts.slice().reverse().map(a => `
+            <div class="card alert-card">
+                <strong>${a.type}</strong><br>
+                <small>Agent: ${a.agent} | ${a.details}</small>
+            </div>
+        `).join('');
+    }
+
+    function renderDomains(domains) {
+        document.getElementById('domain-list').innerHTML = domains.map(d => `
+            <div class="card">
+                <strong>${d.name}</strong><br>
+                <small>Topics: ${d.topics.join(', ')}</small>
+            </div>
+        `).join('');
+    }
+
+    setInterval(fetchData, 1000);
+</script>
+</body>
+</html>

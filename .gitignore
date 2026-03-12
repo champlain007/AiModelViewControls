@@ -1,0 +1,49 @@
+# CMake / Build Artifacts
+build/
+xcode_build/
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+
+# Executables
+AgenticPipeline
+AgenticMVCpipe
+*.app
+*.exe
+*.out
+
+# Project Specific Security & State (NEVER COMMIT)
+blockchain_ledger*
+*.enc
+nodes.json
+.env
+
+# Logs and Local Testing
+*.log
+test_secrets.sh
+manual_*.log
+node_*.log
+orchestrator*.log
+dashboard_error.log
+server_test*.log
+
+# Standard Code Navigation & Doxygen
+tags
+cscope.*
+Doxyfile
+html/
+latex/
+
+# OS & IDE Metadata
+.DS_Store
+.vscode/
+.idea/
+.clangd/
+.cache/
+*.swp
+*.swo
+*~

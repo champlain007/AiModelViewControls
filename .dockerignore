@@ -1,0 +1,21 @@
+# Ignore local build artifacts and sensitive data
+build/
+xcode_build/
+data/
+*.zip
+
+# Ignore local logs and test files
+*.log
+*.enc
+*.json
+test_secrets.sh
+
+# Ignore git and OS metadata
+.git/
+.github/
+.gitignore
+.gitattributes
+.DS_Store
+
+# Ignore the docker directory itself from the build context
+docker/
