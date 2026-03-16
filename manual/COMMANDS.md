@@ -18,8 +18,15 @@ The core framework executable.
 **Usage:** `./AgenticMVCclientCLI [OPTIONS]`
 
 Secure client for interacting with nodes.
-- `--http`: Real-world network mode.
-- `--alert-sync`: Pushes local Red Team alerts to the parent orchestrator.
+- `--http`: Use real HTTP transmission instead of the mock connector.
+- `--target=<url>`: Specify the target engine (default: localhost:8080).
+- `--alert-sync`: Enable real-time alert synchronization to the central orchestrator.
+- `--av-cmd="<command>"`: Configure a custom anti-virus/malware scanner command. Use `%f` as a placeholder for the file path (e.g., `--av-cmd="clamscan --no-summary %f"`).
+
+**Interactive Commands:**
+- `send <payload>`: Scans (Malware/DLP/RedTeam) and transmits data.
+- `help`: Displays local command help.
+- `exit`: Shuts down the client.
 
 ## AgenticMVCserverCLI
 **Usage:** `./AgenticMVCserverCLI`
