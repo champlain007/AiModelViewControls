@@ -1,16 +1,16 @@
 #!/bin/bash
 # ==============================================================================
-# AgenticMVCpipe - Trade Secret Configuration and Boot Script
+# AiModelViewControls - Trade Secret Configuration and Boot Script
 # ==============================================================================
 # This script is the ONLY configuration and initiating (booting) file for
-# handshaking, transfers, and connections between AgenticMVCpipe instances.
+# handshaking, transfers, and connections between AiModelViewControls instances.
 # ==============================================================================
 export TRADESECRET_HANDSHAKE_KEY="APPROVED_BY_TRADESECRET"
 export ORCH_PORT=${ORCH_PORT:-9000}
 export MCP_PORT=${MCP_PORT:-9100}
 export WS_PORT=${WS_PORT:-9200}
 export PORT=${PORT:-8080}
-BINARY="./build/AgenticPipeline"
+BINARY="./build/AiModelViewControls"
 if [ ! -f "$BINARY" ]; then mkdir -p build && cd build && cmake .. && make && cd ..; fi
 if [ "$1" == "--interactive" ] || [ "$1" == "-i" ]; then
     read -p "Enter Orchestrator Port [$ORCH_PORT]: " user_orch

@@ -1,70 +1,66 @@
-# AgenticMVCpipe
+# AiModelViewControls (AiMVCs)
 
-[![Security: Hardened](https://img.shields.io/badge/Security-Hardened-green.svg)](https://github.com/champlain007/AgenticMVCpipe)
-[![Standard: C++20](https://img.shields.io/badge/Standard-C%2B%2B20-blue.svg)](https://github.com/champlain007/AgenticMVCpipe)
+## 🛡️ Enterprise-Grade Agentic AI Orchestration Framework
 
-**AgenticMVCpipe** is a modular, decentralized, and security-hardened C++ framework for agentic orchestration, real-time distributed intelligence, and automated sandboxing.
+AiModelViewControls (AiMVCs) is a comprehensive C++ framework designed for the secure management, orchestration, and pipelining of distributed Agentic AI nodes. It provides a robust Model-View-Controller (MVC) architecture focused on sandboxed execution, real-time threat detection, and seamless node-to-node handshaking.
 
-## 🚀 Key Features
+---
 
-- **Architectural Excellence**: Fully adheres to modern design patterns (Factory, Strategy, State, Singleton, Builder, and Chain of Responsibility).
-- **Security First**: 
-  - **Real-Time Malware Scanning**: Integrated ingress/egress scanning using a modular scanner chain (ClamAV compatible).
-  - **Data Leak Prevention (DLP)**: Transmissions are monitored for sensitive cryptographic keys and connection secrets.
-  - **Instance Sandboxing**: Isolated execution environments with localized configuration and boot scripts.
-- **Modular Ecosystem**:
-  - **Core Node**: TUI-based Dashboard, Orchestrator, and Security Gateway.
-  - **AgenticMVCserverCLI**: Lightweight, view-free core engine for headless server environments.
-  - **AgenticMVCclientCLI**: Secure, view-free client for remote task submission.
+## 🏗️ Core Architecture
 
-## 🛠 Installation & Setup
+### AiModelViewControls (Facade)
+The primary entry point of the system. It abstracts the underlying complexities of the orchestrator and service factories, providing a high-level API for framework initialization.
 
-### Requirements
-- OS: Linux, macOS, or Windows (WSL)
-- Compiler: C++17 or higher (C++20 recommended)
-- Build Tool: CMake 3.10+
-- Dependencies: OpenSSL, ZLIB, Threads (all handled via CMake)
+### AgenticMVCpipe (Pipeline Engine)
+A specialized sub-component of AiMVCs responsible for:
+- Creating secure connection chains between distributed nodes.
+- Managing handshakes and authentication pipelines.
+- Ensuring data integrity across the transmission stream.
 
-### One-Click Quick Start
-The system is autonomously managed via the `tradesecret.sh` script. This is the **only** authorized entry point for initialization and security handshaking.
+---
+
+## 🛠️ Sub-Projects
+
+### 1. AgenticMVCclientCLI (Secure Client)
+A highly modular, SRP-compliant C++ CLI client. It acts as the "Secure Edge" of the framework, performing mandatory pre-flight security scans including:
+- **Malware Detection:** Native ClamAV integration.
+- **DLP (Data Loss Prevention):** Scans for leaked RSA keys, AWS credentials, and PII.
+- **Red Team Heuristics (PyRIT style):** Native detection of Jailbreaks, Crescendo attacks, Obfuscation (Base64/Spacing), and Cognitive Hacking.
+- **Alert Syncing:** Real-time push of locally caught threats to the Parent Orchestrator.
+
+### 2. AgenticMVCserverCLI (Agent Engine)
+A lightweight, headless C++ engine designed for task execution within isolated sandboxes. It provides the execution environment for the model's instructions while maintaining strict local guardrails.
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- **CMake** (3.25+)
+- **C++20/26** Compiler (Clang/GCC)
+- **OpenSSL** & **ZLIB**
+- **ClamAV** (Optional, for local malware scanning)
+
+### Initialization & Startup
+The framework is strictly managed via the `tradesecret.sh` bootstrapper. This script handles all environment configurations, port assignments, and handshake keys.
 
 ```bash
-git clone https://github.com/champlain007/AgenticMVCpipe.git
-cd AgenticMVCpipe
+# 1. Clone the repository
+git clone https://github.com/champlain007/AiModelViewControls.git
+cd AiModelViewControls
+
+# 2. Launch the framework
 chmod +x tradesecret.sh
 ./tradesecret.sh --interactive
 ```
 
-## 📖 Command Manual
+---
 
-### `tradesecret.sh`
-The primary bootstrapper and configuration tool.
-- `-i, --interactive`: Launches a configuration prompt for ports and keys.
-- (Default): Starts all core services and the Dashboard.
-
-### Applications
-
-| Application | Purpose |
-| :--- | :--- |
-| `AgenticPipeline` | Main node with Dashboard, Orchestrator, and MCP. |
-| `AgenticMVCserverCLI` | Headless DockerEngine-like engine for automation. |
-| `AgenticMVCclientCLI` | Secure task submission client with local DLP. |
-
-## 🧩 Architectural Overview
-
-- **Factory Pattern**: Dynamically initializes services (Orchestrator, MCP, CLI) based on startup flags.
-- **State Pattern**: Manages node status (`NORMAL`, `WARNING`, `LOCKDOWN`) and enforces dynamic authorization.
-- **Strategy Pattern**: Decouples connection types (HTTP, WebSocket, Local File) and security detectors.
-- **Chain of Responsibility**: Sequences multiple malware scanners and data leak detectors for comprehensive coverage.
-
-## 🛡 Security Governance
-In the event of a malware detection or data leak:
-1. The connection is **immediately suspended**.
-2. The user is verbosely alerted via the TUI Dashboard or API.
-3. The user has the choice to **Resume** (after review) or **Terminate** the connection.
-
-## 📄 License
-This project is for secure, decentralized agentic research and deployment. 
+## 📄 Documentation
+- **[Manual Pages](./manual/COMMANDS.md):** Full command reference for all framework components.
+- **[Troubleshooting Guide](./help/TROUBLESHOOTING.md):** Detailed help with handshaking and security violations.
 
 ---
-*Maintained by champlain007*
+
+## ⚖️ License & Security
+AiModelViewControls is built with a security-first mindset. All egress data from clients is spotlighted (Defensive Encoding) to prevent prompt injection and ensure downstream models prioritize system instructions over untrusted user data.

@@ -1,10 +1,6 @@
 #pragma once
 #include <string>
 
-/**
- * @brief Strategy Interface for Client Connection Methods.
- * Provides a polymorphic way to send data (e.g., HTTP, WebSockets, or Local IPC)
- */
 class IClientConnector {
 public:
     virtual ~IClientConnector() = default;

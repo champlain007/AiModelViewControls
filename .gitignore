@@ -47,3 +47,11 @@ latex/
 *.swp
 *.swo
 *~
+build/
+*.log
+.DS_Store
+xcode_build/
+bin/
+*.enc
+*.json.enc
+www/

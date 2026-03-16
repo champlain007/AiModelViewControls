@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(AgenticPipeline)
+project(AiModelViewControls)
 
 # Enable standard tooling support (clangd, IDEs, code navigators)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -53,7 +53,7 @@ FetchContent_MakeAvailable(ixwebsocket)
 include_directories(include)
 
 # Executable
-add_executable(AgenticPipeline 
+add_executable(AiModelViewControls 
     src/main.cpp
     src/Model.cpp
     src/connectors/IConnectorStrategy.cpp
@@ -68,21 +68,21 @@ add_executable(AgenticPipeline
     src/SandboxManager.cpp
 )
 
-# Add CLI Engine sub-package
+# Add CLI Engine sub-packages
 add_subdirectory(AgenticMVCserverCLI)
 add_subdirectory(AgenticMVCclientCLI)
 
 if(TARGET cpp-httplib)
-    target_link_libraries(AgenticPipeline PRIVATE cpp-httplib)
+    target_link_libraries(AiModelViewControls PRIVATE cpp-httplib)
 else()
-    target_include_directories(AgenticPipeline PRIVATE ${cpp-httplib_SOURCE_DIR})
+    target_include_directories(AiModelViewControls PRIVATE ${cpp-httplib_SOURCE_DIR})
 endif()
 
 find_package(OpenSSL REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(Threads REQUIRED)
 
-target_link_libraries(AgenticPipeline
+target_link_libraries(AiModelViewControls
     PRIVATE
     nlohmann_json::nlohmann_json
     ftxui::screen
@@ -96,10 +96,10 @@ target_link_libraries(AgenticPipeline
 )
 
 # Copy web files to build directory
-add_custom_command(TARGET AgenticPipeline POST_BUILD
+add_custom_command(TARGET AiModelViewControls POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/www
-        $<TARGET_FILE_DIR:AgenticPipeline>/www
+        $<TARGET_FILE_DIR:AiModelViewControls>/www
 )
 
 # --- Standard Code Viewing & Navigation Tooling ---
@@ -128,10 +128,6 @@ endif()
 # 3. Doxygen support (HTML/PDF class documentation generation)
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
-    # Generate a default Doxyfile if one doesn't exist
-    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/Doxyfile")
-        execute_process(COMMAND ${DOXYGEN_EXECUTABLE} -g "${CMAKE_SOURCE_DIR}/Doxyfile" WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} OUTPUT_QUIET)
-    endif()
     add_custom_target(docs
         COMMAND ${DOXYGEN_EXECUTABLE} "${CMAKE_SOURCE_DIR}/Doxyfile"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}

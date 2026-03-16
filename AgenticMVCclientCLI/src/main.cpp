@@ -1,111 +1,77 @@
-#include "IAgenticClient.hpp"
+#include "AgenticApp.hpp"
+#include "core/SessionManager.hpp"
+#include "core/AlertDispatcher.hpp"
+#include "security/MalwareScanner.hpp"
+#include "security/DlpScanner.hpp"
+#include "security/PromptInjectionScanner.hpp"
+#include "security/SocialEngineeringScanner.hpp"
+#include "security/CognitiveHackingScanner.hpp"
+#include "security/ObfuscationScanner.hpp"
+#include "security/IndirectInjectionScanner.hpp"
+#include "formatters/UserMarkdownFormatter.hpp"
+#include "formatters/SpotlightFormatter.hpp"
+#include "connectors/HttpClientConnector.hpp"
+#include "connectors/MockClientConnector.hpp"
+#include "ui/CliInteractor.hpp"
 #include <iostream>
-#include <fstream>
-#include <filesystem>
-#include <cstdlib>
 #include <memory>
-
-class AgenticMVCclientCLI {
-public:
-    AgenticMVCclientCLI(std::unique_ptr<IClientConnector> connector) 
-        : m_connector(std::move(connector)) {}
-
-    bool initialize(const std::string& target) {
-        std::cout << "[Client] Initializing AgenticMVCclientCLI..." << std::endl;
-        if (std::system("clamscan --version > /dev/null 2>&1") != 0) {
-            std::cerr << "[Security] WARNING: Local AV (clamscan) not found. Client will alert on untrusted egress streams." << std::endl;
-        }
-        return m_connector->connect(target);
-    }
-
-    std::string executeTask(const std::string& payload) {
-        // --- LOCAL MANDATORY SECURITY SCAN (Strategy-based) ---
-        if (!performSecurityScan(payload)) {
-            return "SECURITY_VIOLATION: Payload blocked by local Malware/DLP scanner before transmission.";
-        }
-
-        std::cout << "[Client] Security checks passed. Transmitting payload..." << std::endl;
-        return m_connector->sendPayload(payload);
-    }
-
-    void shutdown() {
-        m_connector->disconnect();
-        std::cout << "[Client] Agentic Client disconnected and shut down." << std::endl;
-    }
-
-private:
-    bool performSecurityScan(const std::string& data) {
-        std::string tempFile = "/tmp/agent_client_scan.tmp";
-        std::ofstream ofs(tempFile);
-        ofs << data;
-        ofs.close();
-
-        // 1. Malware Scan
-        int res = std::system(("clamscan --no-summary " + tempFile + " > /dev/null 2>&1").c_str());
-        std::filesystem::remove(tempFile);
-
-        if (res == 1) {
-            std::cerr << "[ALERT] MALWARE DETECTED in egress payload. Transmission blocked." << std::endl;
-            return false;
-        }
-
-        // 2. DLP Key Leak Detection
-        if (data.find("BEGIN RSA PRIVATE KEY") != std::string::npos ||
-            data.find("TRADESECRET_HANDSHAKE_KEY") != std::string::npos) {
-            std::cerr << "[ALERT] DLP: Potential Key/Secret Leak detected. Transmission blocked." << std::endl;
-            return false;
-        }
-
-        return true;
-    }
-
-    std::unique_ptr<IClientConnector> m_connector;
-};
-
-// Mock concrete strategy for demonstration (could be HTTP or IPC in a real scenario)
-class MockClientConnector : public IClientConnector {
-public:
-    bool connect(const std::string& target) override {
-        std::cout << "[Connector] Connected to target: " << target << std::endl;
-        return true;
-    }
-    
-    std::string sendPayload(const std::string& data) override {
-        return "SERVER_RESPONSE: Received " + std::to_string(data.size()) + " bytes.";
-    }
-    
-    void disconnect() override {
-        std::cout << "[Connector] Disconnected." << std::endl;
-    }
-};
+#include <string>
 
 int main(int argc, char** argv) {
     std::string target = "localhost:8080";
-    if (argc > 1) {
-        target = argv[1];
+    bool useHttp = false;
+    bool syncAlerts = false;
+
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+        if (arg == "--http") {
+            useHttp = true;
+        } else if (arg == "--alert-sync") {
+            syncAlerts = true;
+        } else if (arg.find("--target=") == 0) {
+            target = arg.substr(9);
+        } else if (arg[0] != '-') {
+            target = arg;
+        }
     }
 
-    auto connector = std::make_unique<MockClientConnector>();
-    AgenticMVCclientCLI client(std::move(connector));
+    // Dependency Injection
+    std::unique_ptr<IClientConnector> connector;
+    if (useHttp) {
+        connector = std::make_unique<HttpClientConnector>();
+    } else {
+        connector = std::make_unique<MockClientConnector>();
+    }
+    
+    IClientConnector* connectorPtr = connector.get();
 
-    if (!client.initialize(target)) {
-        std::cerr << "Failed to connect to target." << std::endl;
+    auto sessionState = std::make_unique<SessionManager>();
+    auto alertHandler = std::make_unique<AlertDispatcher>(connectorPtr, syncAlerts);
+    
+    auto securityPipeline = std::make_unique<SecurityPipeline>(alertHandler.get());
+    securityPipeline->addScanner(std::make_unique<MalwareScanner>());
+    securityPipeline->addScanner(std::make_unique<DlpScanner>());
+    securityPipeline->addScanner(std::make_unique<PromptInjectionScanner>());
+    securityPipeline->addScanner(std::make_unique<SocialEngineeringScanner>());
+    securityPipeline->addScanner(std::make_unique<CognitiveHackingScanner>());
+    securityPipeline->addScanner(std::make_unique<ObfuscationScanner>());
+    securityPipeline->addScanner(std::make_unique<IndirectInjectionScanner>());
+
+    auto formatterPipeline = std::make_unique<FormatterPipeline>();
+    formatterPipeline->addFormatter(std::make_unique<UserMarkdownFormatter>());
+    formatterPipeline->addFormatter(std::make_unique<SpotlightFormatter>());
+
+    AgenticApp app(std::move(connector), std::move(sessionState), std::move(alertHandler),
+                   std::move(securityPipeline), std::move(formatterPipeline));
+
+    if (!app.initialize(target)) {
+        std::cerr << "Failed to initialize AgenticApp." << std::endl;
         return 1;
     }
 
-    std::string line;
-    std::cout << "AgenticMVCclientCLI> " << std::flush;
-    while (std::getline(std::cin, line)) {
-        if (line == "exit" || line == "quit") break;
-        if (line.find("send ") == 0) {
-            std::string payload = line.substr(5);
-            std::cout << client.executeTask(payload) << std::endl;
-        } else {
-            std::cout << "Unknown command. Try: send <payload>, exit" << std::endl;
-        }
-        std::cout << "AgenticMVCclientCLI> " << std::flush;
-    }
+    CliInteractor ui(app, useHttp);
+    ui.run();
 
-    client.shutdown();
+    app.shutdown();
     return 0;
 }

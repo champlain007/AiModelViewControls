@@ -6,6 +6,14 @@
 #include <thread>
 #include <filesystem>
 #include <fstream>
+#include <httplib.h>
+#include <nlohmann/json.hpp>
+#ifdef _WIN32
+#include <io.h>
+#define isatty _isatty
+#else
+#include <unistd.h>
+#endif
 
 /**
  * @brief Lightweight implementation of the Agentic Engine.
@@ -27,6 +35,32 @@ public:
     void start() override {
         m_running = true;
         std::cout << "[Engine] Agentic Engine Started (View-Free CLI mode)." << std::endl;
+        
+        // Start HTTP Server Thread
+        m_httpThread = std::thread([this]() {
+            httplib::Server svr;
+
+            svr.Post("/api/send", [this](const httplib::Request& req, httplib::Response& res) {
+                std::cout << "[HTTP] Received POST /api/send" << std::endl;
+                try {
+                    auto j = nlohmann::json::parse(req.body);
+                    std::string payload = j.at("payload").get<std::string>();
+                    std::string result = this->executeTask(payload);
+                    res.set_content(result, "text/plain");
+                } catch (const std::exception& e) {
+                    res.status = 400;
+                    res.set_content("Invalid JSON: " + std::string(e.what()), "text/plain");
+                }
+            });
+
+            svr.Get("/status", [this](const httplib::Request&, httplib::Response& res) {
+                res.set_content(this->getStatus(), "text/plain");
+            });
+
+            std::cout << "[HTTP] Server listening on 0.0.0.0:8080" << std::endl;
+            svr.listen("0.0.0.0", 8080);
+        });
+        m_httpThread.detach();
     }
 
     void stop() override {
@@ -59,7 +93,6 @@ public:
 private:
     bool performSecurityScan(const std::string& data) {
         // Lightweight shell-out to AV or internal DLP patterns
-        // This works with any generic scanner available in the OS path
         std::string tempFile = "/tmp/agent_cli_scan.tmp";
         std::ofstream ofs(tempFile);
         ofs << data;
@@ -86,6 +119,7 @@ private:
     std::atomic<bool> m_running;
     std::map<std::string, std::string> m_tasks;
     mutable std::mutex m_mutex;
+    std::thread m_httpThread;
 };
 
 int main(int argc, char** argv) {
@@ -95,19 +129,26 @@ int main(int argc, char** argv) {
     engine->start();
 
     // Simple command loop for the view-free CLI
-    std::string line;
-    std::cout << "AgenticMVCserverCLI> " << std::flush;
-    while (engine->isRunning() && std::getline(std::cin, line)) {
-        if (line == "exit" || line == "quit") break;
-        if (line == "status") {
-            std::cout << "Status: " << engine->getStatus() << std::endl;
-        } else if (line.find("exec ") == 0) {
-            std::string payload = line.substr(5);
-            std::cout << engine->executeTask(payload) << std::endl;
-        } else {
-            std::cout << "Unknown command. Try: status, exec <payload>, exit" << std::endl;
-        }
+    if (isatty(0)) {
+        std::string line;
         std::cout << "AgenticMVCserverCLI> " << std::flush;
+        while (engine->isRunning() && std::getline(std::cin, line)) {
+            if (line == "exit" || line == "quit") break;
+            if (line == "status") {
+                std::cout << "Status: " << engine->getStatus() << std::endl;
+            } else if (line.find("exec ") == 0) {
+                std::string payload = line.substr(5);
+                std::cout << engine->executeTask(payload) << std::endl;
+            } else {
+                std::cout << "Unknown command. Try: status, exec <payload>, exit" << std::endl;
+            }
+            std::cout << "AgenticMVCserverCLI> " << std::flush;
+        }
+    } else {
+        // Keep running in background if not interactive
+        while (engine->isRunning()) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
     }
 
     engine->stop();
