@@ -19,7 +19,7 @@ Use these keywords in GitHub Issues, Wiki pages, and Release notes to improve se
 - AI Orchestration Framework
 - Prompt Injection Defense C++
 - Model-View-Controller AI Agents
-- PyRIT-style C++ Security
+- Red Team C++ Security Analysis features
 
 ## 📅 Release Checklist
 1. [ ] Update `tradesecret.sh` versioning.
