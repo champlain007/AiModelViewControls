@@ -23,7 +23,7 @@ A specialized sub-component of AiMVCs responsible for:
 
 ### 1. AgenticMVCclientCLI (Secure Client)
 A highly modular, SRP-compliant C++ CLI client. It acts as the "Secure Edge" of the framework, performing mandatory pre-flight security scans including:
-- **Malware Detection:** Native ClamAV integration.
+- **Malware Detection:** Generic AV integration (configurable to use ClamAV or any third-party scanner).
 - **DLP (Data Loss Prevention):** Scans for leaked RSA keys, AWS credentials, and PII.
 - **Red Team Heuristics:** Native detection of Jailbreaks, Crescendo attacks, Obfuscation (Base64/Spacing), and Cognitive Hacking.
 - **Alert Syncing:** Real-time push of locally caught threats to the Parent Orchestrator.

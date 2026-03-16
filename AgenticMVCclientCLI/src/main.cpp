@@ -19,6 +19,7 @@
 
 int main(int argc, char** argv) {
     std::string target = "localhost:8080";
+    std::string avCmd = "clamscan --no-summary %f";
     bool useHttp = false;
     bool syncAlerts = false;
 
@@ -30,6 +31,8 @@ int main(int argc, char** argv) {
             syncAlerts = true;
         } else if (arg.find("--target=") == 0) {
             target = arg.substr(9);
+        } else if (arg.find("--av-cmd=") == 0) {
+            avCmd = arg.substr(9);
         } else if (arg[0] != '-') {
             target = arg;
         }
@@ -49,7 +52,7 @@ int main(int argc, char** argv) {
     auto alertHandler = std::make_unique<AlertDispatcher>(connectorPtr, syncAlerts);
     
     auto securityPipeline = std::make_unique<SecurityPipeline>(alertHandler.get());
-    securityPipeline->addScanner(std::make_unique<MalwareScanner>());
+    securityPipeline->addScanner(std::make_unique<MalwareScanner>(avCmd));
     securityPipeline->addScanner(std::make_unique<DlpScanner>());
     securityPipeline->addScanner(std::make_unique<PromptInjectionScanner>());
     securityPipeline->addScanner(std::make_unique<SocialEngineeringScanner>());
