@@ -9,7 +9,8 @@ AiModelViewControls (AiMVCs) is a comprehensive C++ framework designed for the s
 ## 🏗️ Core Architecture
 
 ### AiModelViewControls (Facade)
-The primary entry point of the system. It abstracts the underlying complexities of the orchestrator and service factories, providing a high-level API for framework initialization.
+The primary entry point of the frameworked system. It abstracts the underlying complexities of the orchestrator and service factories, providing a high-level agentic Ai management and interaction
+user interface system.
 
 ### AgenticMVCpipe (Pipeline Engine)
 A specialized sub-component of AiMVCs responsible for:
@@ -23,7 +24,7 @@ A specialized sub-component of AiMVCs responsible for:
 
 ### 1. AgenticMVCclientCLI (Secure Client)
 A highly modular, SRP-compliant C++ CLI client. It acts as the "Secure Edge" of the framework, performing mandatory pre-flight security scans including:
-- **Malware Detection:** Generic AV integration (configurable to use ClamAV or any third-party scanner).
+- **Malware Detection:** Generic AV integration (configurable to use any third-party scanner).
 - **DLP (Data Loss Prevention):** Scans for leaked RSA keys, AWS credentials, and PII.
 - **Red Team Heuristics:** Native detection of Jailbreaks, Crescendo attacks, Obfuscation (Base64/Spacing), and Cognitive Hacking.
 - **Alert Syncing:** Real-time push of locally caught threats to the Parent Orchestrator.
@@ -39,7 +40,7 @@ A lightweight, headless C++ engine designed for task execution within isolated s
 - **CMake** (3.25+)
 - **C++20/26** Compiler (Clang/GCC)
 - **OpenSSL** & **ZLIB**
-- **ClamAV** (Optional, for local malware scanning)
+- interface for custom anti-virus/anti-malware scanning software
 
 ### Initialization & Startup
 The framework is strictly managed via the `tradesecret.sh` bootstrapper. This script handles all environment configurations, port assignments, and handshake keys.
@@ -63,4 +64,5 @@ chmod +x tradesecret.sh
 ---
 
 ## ⚖️ License & Security
+Apache License 2.0
 AiModelViewControls is built with a security-first mindset. All egress data from clients is spotlighted (Defensive Encoding) to prevent prompt injection and ensure downstream models prioritize system instructions over untrusted user data.
