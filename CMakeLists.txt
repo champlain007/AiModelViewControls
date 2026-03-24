@@ -66,6 +66,7 @@ add_executable(AiModelViewControls
     src/cli/CliClient.cpp
     src/docker/DockerFacade.cpp
     src/SandboxManager.cpp
+    src/XWayland.cpp
 )
 
 # Add CLI Engine sub-packages

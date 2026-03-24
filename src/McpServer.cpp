@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 
 void AgenticMcpController::start(int port) {
+    m_wayland.start();
     m_svr.Post("/mcp/inference", [](const httplib::Request& req, httplib::Response& res) {
         std::string auth = req.get_header_value("Authorization");
         std::string token = (auth.find("Bearer ") == 0) ? auth.substr(7) : "";
@@ -38,4 +39,5 @@ void AgenticMcpController::start(int port) {
 
 void AgenticMcpController::stop() {
     m_svr.stop();
+    m_wayland.stop();
 }

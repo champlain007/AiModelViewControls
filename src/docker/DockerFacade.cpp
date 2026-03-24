@@ -7,9 +7,11 @@ using json = nlohmann::json;
 
 DockerFacade::DockerFacade(const std::string& host, int port) : m_host(host), m_port(port) {
     m_cli = new httplib::Client(m_host, m_port);
+    m_wayland.start();
 }
 
 DockerFacade::~DockerFacade() {
+    m_wayland.stop();
     delete m_cli;
 }
 

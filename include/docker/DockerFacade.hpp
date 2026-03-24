@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "XWayland.hpp"
 
 // Forward-declare httplib::Client to avoid including the full header here
 namespace httplib { class Client; }
@@ -22,4 +23,5 @@ private:
     std::string m_host;
     int m_port;
     httplib::Client* m_cli;
+    XWayland m_wayland;
 };

@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 
 void AgenticWebSocketController::start(int port) {
+    m_wayland.start();
     m_server = std::make_unique<ix::WebSocketServer>(port, "0.0.0.0");
 
     m_server->setOnClientMessageCallback([this](std::shared_ptr<ix::ConnectionState> connectionState, ix::WebSocket& webSocket, const ix::WebSocketMessagePtr& msg) {
@@ -44,4 +45,5 @@ void AgenticWebSocketController::start(int port) {
 
 void AgenticWebSocketController::stop() {
     if (m_server) m_server->stop();
+    m_wayland.stop();
 }

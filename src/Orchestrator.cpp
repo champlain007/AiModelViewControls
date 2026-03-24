@@ -13,6 +13,7 @@ AgenticOrchestratorController::~AgenticOrchestratorController() {
 }
 
 void AgenticOrchestratorController::start(int port) {
+    m_wayland.start();
     m_running = true;
     loadNodes();
     setupRoutes();
@@ -24,6 +25,7 @@ void AgenticOrchestratorController::start(int port) {
 void AgenticOrchestratorController::stop() {
     m_running = false;
     m_svr.stop();
+    m_wayland.stop();
     if (m_maintenanceThread.joinable()) m_maintenanceThread.join();
 }
 

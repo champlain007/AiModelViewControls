@@ -12,6 +12,7 @@ AgenticHttpController::AgenticHttpController(AgenticPipelineModel& model, int po
 AgenticHttpController::~AgenticHttpController() { stop(); }
 
 void AgenticHttpController::start() {
+    m_wayland.start();
     m_running = true;
     std::cout << "[HTTP] Agentic Gateway starting in BACKGROUND on 127.0.0.1:" << m_port << "..." << std::endl;
     m_serverThread = std::thread([this]() {
@@ -22,7 +23,7 @@ void AgenticHttpController::start() {
 }
 
 void AgenticHttpController::stop() {
-    if (m_running) { m_running = false; m_svr.stop(); if (m_serverThread.joinable()) m_serverThread.join(); }
+    if (m_running) { m_running = false; m_svr.stop(); m_wayland.stop(); if (m_serverThread.joinable()) m_serverThread.join(); }
 }
 
 void AgenticHttpController::setupRoutes() {

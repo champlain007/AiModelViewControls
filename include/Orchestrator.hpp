@@ -7,6 +7,7 @@
 #include <httplib.h>
 #include <nlohmann/json.hpp>
 #include "Model.hpp"
+#include "XWayland.hpp"
 
 class AgenticOrchestratorController {
 public:
@@ -31,4 +32,5 @@ private:
     std::mutex m_nodesMutex;
     std::string m_scriptDir;
     std::string m_binaryPath;
+    XWayland m_wayland;
 };

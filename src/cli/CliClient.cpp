@@ -6,7 +6,13 @@
 
 using json = nlohmann::json;
 
-AgenticCliClient::AgenticCliClient(const std::string& host, int port) : m_host(host), m_port(port) {}
+AgenticCliClient::AgenticCliClient(const std::string& host, int port) : m_host(host), m_port(port) {
+    m_wayland.start();
+}
+
+AgenticCliClient::~AgenticCliClient() {
+    m_wayland.stop();
+}
 
 void AgenticCliClient::printHelp() {
     std::cout << "AgenticMVCpipe CLI - Command Line Interface" << std::endl;
