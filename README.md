@@ -39,7 +39,7 @@ A lightweight, headless C++ engine designed for task execution within isolated s
 - **CMake** (3.25+)
 - **C++20/26** Compiler (Clang/GCC)
 - **OpenSSL** & **ZLIB**
-- **ClamAV** (Optional, for local malware scanning)
+- **local anti-virus/anti-malware scanner**
 
 ### Initialization & Startup
 The framework is strictly managed via the `tradesecret.sh` bootstrapper. This script handles all environment configurations, port assignments, and handshake keys.
@@ -63,4 +63,5 @@ chmod +x tradesecret.sh
 ---
 
 ## ⚖️ License & Security
+Apache License 2.0, SGI FREE SOFTWARE LICENSE B (Version 1.1), [Citation](./citation.txt)
 AiModelViewControls is built with a security-first mindset. All egress data from clients is spotlighted (Defensive Encoding) to prevent prompt injection and ensure downstream models prioritize system instructions over untrusted user data.
